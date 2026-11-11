@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>CRUD Data Mahasiswa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>Input Data Mahasiswa</h2>
+
+  <form id="form">
+    <input type="hidden" id="id">
+
+    <label>NIM:</label>
+    <input type="text" id="nim" required>
+
+    <label>Nama:</label>
+    <input type="text" id="nama" required>
+
+    <label>Jurusan:</label>
+    <select id="jurusan" required>
+      <option value="">-- Pilih Jurusan --</option>
+      <option value="Teknik Informatika">Teknik Informatika</option>
+      <option value="Sistem Informasi">Sistem Informasi</option>
+      <option value="Teknik Elektro">Teknik Elektro</option>
+    </select>
+
+    <button type="submit" id="btn-simpan">Simpan</button>
+    <button type="button" id="btn-batal" onclick="batal()" style="display: none;">Batal</button>
+  </form>
+
+  <h2>Daftar Mahasiswa</h2>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>NIM</th>
+        <th>Nama</th>
+        <th>Jurusan</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="tabel-data"></tbody>
+  </table>
+
+  <script src="script.js"></script>
+</body>
+</html>

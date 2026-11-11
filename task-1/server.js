@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
 const path = require('path');
@@ -6,12 +7,12 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Koneksi ke database TiDB Cloud (MySQL Online)
+// Koneksi ke database TiDB Cloud menggunakan Environment Variables (.env)
 const db = mysql.createPool({
-  host: process.env.DB_HOST || 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
+  host: process.env.DB_HOST,
   port: process.env.DB_PORT || 4000,
-  user: process.env.DB_USERNAME || 'TxfFThUFQahWztb.root',
-  password: process.env.DB_PASSWORD || 'Z5Tnv3eec2OFlPP4',
+  user: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE || 'db_kampus',
   ssl: {
     minVersion: 'TLSv1.2',
@@ -70,7 +71,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Jalankan server jika dijalankan secara lokal (bukan Vercel)
+// Jalankan port jika di komputer lokal (bukan Vercel)
 if (!process.env.VERCEL) {
   const port = process.env.PORT || 3000;
   app.listen(port, () => {

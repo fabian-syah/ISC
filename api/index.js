@@ -5,7 +5,7 @@ const app = express();
 
 app.use(express.json());
 
-// Koneksi ke database TiDB Cloud
+// Koneksi ke database TiDB Cloud via Environment Variables
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT || 4000,
@@ -18,57 +18,45 @@ const db = mysql.createPool({
   }
 });
 
-// Fungsi pembantu mengambil ID dari URL
-function dapatkanId(req) {
-  if (req.params.id) return req.params.id;
-  const bagian = req.url.split('?')[0].split('/');
-  return bagian[bagian.length - 1];
-}
-
-// Ambil semua data (Read)
-app.get('*', (req, res) => {
-  const sql = 'SELECT * FROM mahasiswa';
-  db.query(sql, (err, hasil) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(hasil);
-  });
-});
-
-// Tambah data baru (Create)
-app.post('*', (req, res) => {
-  const nim = req.body.nim;
-  const nama = req.body.nama;
-  const jurusan = req.body.jurusan;
-
-  const sql = 'INSERT INTO mahasiswa (nim, nama, jurusan) VALUES (?, ?, ?)';
-  db.query(sql, [nim, nama, jurusan], (err, hasil) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.send('Data berhasil disimpan');
-  });
-});
-
-// Ubah data (Update)
-app.put('*', (req, res) => {
-  const id = dapatkanId(req);
-  const nim = req.body.nim;
-  const nama = req.body.nama;
-  const jurusan = req.body.jurusan;
-
-  const sql = 'UPDATE mahasiswa SET nim = ?, nama = ?, jurusan = ? WHERE id = ?';
-  db.query(sql, [nim, nama, jurusan, id], (err, hasil) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.send('Data berhasil diupdate');
-  });
-});
-
-// Hapus data (Delete)
-app.delete('*', (req, res) => {
-  const id = dapatkanId(req);
-  const sql = 'DELETE FROM mahasiswa WHERE id = ?';
-  db.query(sql, [id], (err, hasil) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.send('Data berhasil dihapus');
-  });
+// Penanganan seluruh request CRUD mahasiswa
+app.use((req, res, next) => {
+  if (req.method === 'GET') {
+    // 1. Ambil semua data (Read)
+    const sql = 'SELECT * FROM mahasiswa';
+    db.query(sql, (err, hasil) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(hasil);
+    });
+  } else if (req.method === 'POST') {
+    // 2. Tambah data baru (Create)
+    const { nim, nama, jurusan } = req.body;
+    const sql = 'INSERT INTO mahasiswa (nim, nama, jurusan) VALUES (?, ?, ?)';
+    db.query(sql, [nim, nama, jurusan], (err, hasil) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.send('Data berhasil disimpan');
+    });
+  } else if (req.method === 'PUT') {
+    // 3. Ubah data (Update)
+    const parts = req.url.split('?')[0].split('/');
+    const id = parts[parts.length - 1];
+    const { nim, nama, jurusan } = req.body;
+    const sql = 'UPDATE mahasiswa SET nim = ?, nama = ?, jurusan = ? WHERE id = ?';
+    db.query(sql, [nim, nama, jurusan, id], (err, hasil) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.send('Data berhasil diupdate');
+    });
+  } else if (req.method === 'DELETE') {
+    // 4. Hapus data (Delete)
+    const parts = req.url.split('?')[0].split('/');
+    const id = parts[parts.length - 1];
+    const sql = 'DELETE FROM mahasiswa WHERE id = ?';
+    db.query(sql, [id], (err, hasil) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.send('Data berhasil dihapus');
+    });
+  } else {
+    next();
+  }
 });
 
 module.exports = app;

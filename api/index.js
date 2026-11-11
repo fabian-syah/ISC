@@ -5,7 +5,7 @@ const app = express();
 
 app.use(express.json());
 
-// Koneksi ke database TiDB Cloud murni dari Environment Variables (Aman dari GitHub)
+// Koneksi ke database TiDB Cloud
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT || 4000,
@@ -18,8 +18,15 @@ const db = mysql.createPool({
   }
 });
 
+// Fungsi pembantu mengambil ID dari URL
+function dapatkanId(req) {
+  if (req.params.id) return req.params.id;
+  const bagian = req.url.split('?')[0].split('/');
+  return bagian[bagian.length - 1];
+}
+
 // Ambil semua data (Read)
-app.get(['/mahasiswa', '/api/mahasiswa', '/api'], (req, res) => {
+app.get('*', (req, res) => {
   const sql = 'SELECT * FROM mahasiswa';
   db.query(sql, (err, hasil) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -28,7 +35,7 @@ app.get(['/mahasiswa', '/api/mahasiswa', '/api'], (req, res) => {
 });
 
 // Tambah data baru (Create)
-app.post(['/mahasiswa', '/api/mahasiswa', '/api'], (req, res) => {
+app.post('*', (req, res) => {
   const nim = req.body.nim;
   const nama = req.body.nama;
   const jurusan = req.body.jurusan;
@@ -41,8 +48,8 @@ app.post(['/mahasiswa', '/api/mahasiswa', '/api'], (req, res) => {
 });
 
 // Ubah data (Update)
-app.put(['/mahasiswa/:id', '/api/mahasiswa/:id', '/api/:id'], (req, res) => {
-  const id = req.params.id;
+app.put('*', (req, res) => {
+  const id = dapatkanId(req);
   const nim = req.body.nim;
   const nama = req.body.nama;
   const jurusan = req.body.jurusan;
@@ -55,8 +62,8 @@ app.put(['/mahasiswa/:id', '/api/mahasiswa/:id', '/api/:id'], (req, res) => {
 });
 
 // Hapus data (Delete)
-app.delete(['/mahasiswa/:id', '/api/mahasiswa/:id', '/api/:id'], (req, res) => {
-  const id = req.params.id;
+app.delete('*', (req, res) => {
+  const id = dapatkanId(req);
   const sql = 'DELETE FROM mahasiswa WHERE id = ?';
   db.query(sql, [id], (err, hasil) => {
     if (err) return res.status(500).json({ error: err.message });

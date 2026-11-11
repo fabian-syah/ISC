@@ -2,8 +2,12 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/task-1/server.js"
+      "source": "/mahasiswa",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/mahasiswa/(.*)",
+      "destination": "/api/index.js"
     }
   ]
 }
